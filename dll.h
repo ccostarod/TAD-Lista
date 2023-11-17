@@ -33,5 +33,7 @@ void * dllRemoveSpec(DLList *l, Filme *key, int (*cmp)(Filme *, Filme *));
 void * dllGetFirst(DLList *l);
 void * dllGetNext(DLList *l);
 void dllClear(DLList *l);
-void *dllFind(DLList *l, Filme *key, int (*cmp)(Filme *, Filme *));
+// void *dllFind(DLList *l, Filme *key, int (*cmp)(Filme *, Filme *, int), int opcaoConsulta);
+DLList* dllFindAll(DLList *l, Filme *key, int (*cmp)(Filme *, Filme *, int), int opcaoConsulta);
+
 #endif

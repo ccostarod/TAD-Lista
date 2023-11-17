@@ -145,15 +145,18 @@ void dllClear(DLList *l) {
     }
 }
 
-void *dllFind(DLList *l, Filme *key, int (*cmp)(Filme *, Filme *)) {
+DLList* dllFindAll(DLList *l, Filme *key, int (*cmp)(Filme *, Filme *, int), int opcaoConsulta) {
+    DLList *resultList = dllCreate(); // Cria uma nova lista para armazenar os resultados
+
     DLNode *current = l->first;
 
     while (current != NULL) {
-        if (cmp(current->data, key) == TRUE) {
-            return current->data; // Retorna o filme encontrado
+        if (cmp(current->data, key, opcaoConsulta) == TRUE) {
+            // Adiciona o filme encontrado à nova lista
+            dllInsertAsLast(resultList, current->data);
         }
         current = current->next;
     }
 
-    return NULL; // Retorna NULL se o filme não for encontrado
+    return resultList;
 }

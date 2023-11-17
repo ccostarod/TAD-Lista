@@ -1,3 +1,9 @@
+
+/*
+Aluno: Rodrigo Otávio Cantanhede Costa
+main.c: Arquivo de visualizacao denominado "main.c".
+Estrutura de Dados I - Professor Anselmo.
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,17 +13,19 @@
 
 // Função de comparação para encontrar um Filme na coleção
 int compareFilmes(Filme *filme, Filme *key);
+int compareFilmesConsulta(Filme *filme, Filme *key, int opcaoConsulta);
 void printFilm(Filme *filme);
+void printFilmList(DLList *l);
 int main() {
     DLList *colecao = NULL;
-    
+    printf("----------------Acervo de Filmes do Rodrigo----------------");
     int opcao;
     do {
         printf("\nMenu:\n");
         printf("1. Criar colecao\n");
         printf("2. Inserir Filme\n");
         printf("3. Remover Filme\n");
-        printf("4. Consultar Filme\n");
+        printf("4. Consultar Filmes\n");
         printf("5. Listar Filmes\n");
         printf("6. Destruir colecao\n");
         printf("7. Esvaziar colecao\n");
@@ -61,7 +69,6 @@ int main() {
                     printf("Digite o nome do filme: ");
                     fgets(consultaFilme.nome, sizeof(consultaFilme.nome), stdin);
                     consultaFilme.nome[strcspn(consultaFilme.nome, "\n")] = '\0';
-                    // scanf("%s", consultaFilme.nome);
                     printf("Digite o ano do filme: ");
                     scanf("%d", &consultaFilme.ano);
                     printf("Digite a nota do filme: ");
@@ -82,36 +89,62 @@ int main() {
 
             case 4: // Consultar Filme
                 if (colecao != NULL && colecao->first != NULL) {
-                    Filme consultaFilme;
-                    while (getchar() != '\n');
-                    printf("Digite o nome do filme: ");
-                    fgets(consultaFilme.nome, sizeof(consultaFilme.nome), stdin);
-                    consultaFilme.nome[strcspn(consultaFilme.nome, "\n")] = '\0';
-                    // scanf("%s", consultaFilme.nome);
-                    printf("Digite o ano do filme: ");
-                    scanf("%d", &consultaFilme.ano);
-                    printf("Digite a nota do filme: ");
-                    scanf("%f", &consultaFilme.notaImdb);
+                int opcaoConsulta;
+                printf("Escolha o criterio de consulta:\n");
+                printf("1. Nome\n");
+                printf("2. Ano de Lancamento\n");
+                printf("3. Nota do Filme\n");
+                scanf("%d", &opcaoConsulta);
 
-                    Filme *filmeEncontrado = dllFind(colecao, &consultaFilme, compareFilmes);
-                    if (filmeEncontrado != NULL) {
-                        printf("Filme encontrado na colecao:\n");
-                        printFilm(filmeEncontrado);
-                    } else {
-                        printf("Filme nao encontrado na colecao.\n");
-                    }
+                Filme consultaFilme;
+
+                switch (opcaoConsulta) {
+                    case 1:
+                        printf("Digite o nome do filme: ");
+                        while (getchar() != '\n');
+                        fgets(consultaFilme.nome, sizeof(consultaFilme.nome), stdin);
+                        consultaFilme.nome[strcspn(consultaFilme.nome, "\n")] = '\0';
+                        break;
+
+                    case 2:
+                        printf("Digite o ano do filme: ");
+                        scanf("%d", &consultaFilme.ano);
+                        break;
+
+                    case 3:
+                        printf("Digite a nota do filme: ");
+                        scanf("%f", &consultaFilme.notaImdb);
+                        break;
+
+                    default:
+                        printf("Opcao invalida.\n");
+                        return;
+                }
+                DLList *filmesEncontrados = dllFindAll(colecao, &consultaFilme, compareFilmesConsulta, opcaoConsulta);
+
+                if (filmesEncontrados != NULL && filmesEncontrados->first != NULL) {
+                    printf("Filmes encontrados na colecao:\n");
+                    printFilmList(filmesEncontrados);
                 } else {
-                    printf("Crie a colecao primeiro ou coloquye alguem na colecao.\n");
+                    printf("Nenhum filme encontrado na colecao com essa caracteristica de pesquisa.\n");
+                }
+                } else {
+                    printf("Crie a colecao primeiro ou coloque alguém na colecao.\n");
                 }
                 break;
 
             case 5: // Listar Filmes
                 if (colecao != NULL) {
-                    printf("Lista de Filmes:\n");
-                    Filme *filmeAtual = (Filme *)dllGetFirst(colecao);
-                    while (filmeAtual != NULL) {
-                        printFilm(filmeAtual);
-                        filmeAtual = (Filme *)dllGetNext(colecao);
+                    if (colecao->first != NULL){
+                        printf("Lista de Filmes:\n");
+                        Filme *filmeAtual = (Filme *)dllGetFirst(colecao);
+                        while (filmeAtual != NULL) {
+                            printFilm(filmeAtual);
+                            filmeAtual = (Filme *)dllGetNext(colecao);
+                        }
+                    }
+                    else{
+                        printf("Nao ha filmes na colecao para serem listados!\n");
                     }
                 } else {
                     printf("Crie a colecao primeiro.\n");
@@ -158,7 +191,7 @@ int compareFilmes(Filme *filme, Filme *key) {
     Filme *f1 = filme;
     Filme *f2 = key;
 
-    // Comparar pelo nome, ano e notaImdb
+    // Comparar pelo nome, ano e notaImdb (Remocao)
     if (strcmp(f1->nome, f2->nome) == 0 && f1->ano == f2->ano && f1->notaImdb == f2->notaImdb) {
         return TRUE;
     }
@@ -166,7 +199,35 @@ int compareFilmes(Filme *filme, Filme *key) {
     return FALSE;
 }
 
+int compareFilmesConsulta(Filme *filme, Filme *key, int opcaoConsulta) { //Para consulta
+    Filme *f1 = filme;
+    Filme *f2 = key;
+
+    switch (opcaoConsulta) {
+        case 1: // Nome
+            return strcmp(f1->nome, f2->nome) == 0;
+
+        case 2: // Ano de Lançamento
+            return f1->ano == f2->ano;
+
+        case 3: // Nota do Filme
+            return f1->notaImdb == f2->notaImdb;
+
+        default:
+            return FALSE;
+    }
+}
+
 // Função para imprimir um Filme
 void printFilm(Filme *filme) {
     printf("%s, %d, %.2f\n", filme->nome, filme->ano, filme->notaImdb);
+}
+//Função para imprimri uma lista de Filmes (Usado na consulta)
+void printFilmList(DLList *l) {
+    DLNode *current = l->first;
+
+    while (current != NULL) {
+        printFilm(current->data);
+        current = current->next;
+    }
 }
